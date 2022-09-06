@@ -1,0 +1,76 @@
+#Hostile Sexism Predicts Negative Attitudes Toward Condom Use 
+
+#needed packages.
+library(haven)
+library(lavaan)
+library(semPlot)
+library(mediation)
+library(diagram)
+library(medmod)
+library(reshape)
+library (foreign)
+library(apaTables)
+
+setwd('C:/Users/pable/Desktop/Escritorio antiguo/Investigacion/Tesis Lizeth')
+df<-read_sav("dfsexismcond.sav")
+View(df)
+
+df<-as.data.frame(df)
+
+dfhombres <- df[df$sexo==1,]
+dfmujeres <- df[df$sexo==2,]
+
+names(dfhombres)
+
+#correlation matrix for men
+
+dfhomcorela<-cbind(dfhombres$ASIH,dfhombres$ASIB,dfhombres$AMIH,dfhombres$AMIB,dfhombres$consist_uso_cond,dfhombres$prob_uso_cond_prox_relsex,dfhombres$CAEP_Colocaba,dfhombres$CAEP_usaba,dfhombres$UCLA_neg,
+                   dfhombres$UCLA_pleas,dfhombres$UCLA_STI,dfhombres$UCLA_rel,dfhombres$UCLA_sha)
+names(dfhomcorela)<- c( "ASIH", "ASIB","AMIH","AMIB","Cons","Prob","CAEP P","CAEP D","Neg","Pleas","STI","Rel","Sha")  
+dfhomcorela
+dfhomcorela<- dfhomcorela[complete.cases(dfhomcorela), ]
+apa.cor.table(dfhomcorela, filename = "cor homb1.doc", table.number = 1,show.conf.interval = F, landscape = TRUE)
+
+#correlation matrix for women
+dfmujcorela<-cbind(dfmujeres$ASIH,dfmujeres$ASIB,dfmujeres$AMIH,dfmujeres$AMIB,dfmujeres$consist_uso_cond,dfmujeres$prob_uso_cond_prox_relsex,dfmujeres$CAEP_Colocaba,dfmujeres$CAEP_usaba,dfmujeres$UCLA_neg,
+                   dfmujeres$UCLA_pleas,dfmujeres$UCLA_STI,dfmujeres$UCLA_rel,dfmujeres$UCLA_sha)
+
+names(dfmujcorela)<- c( "ASIH", "ASIB","AMIH","AMIB","Cons","Prob","CAEP P","CAEP D","Neg","Pleas","STI","Rel","Sha")  
+dfmujcorela
+
+dfmujcorela<- dfmujcorela[complete.cases(dfmujcorela), ]
+
+apa.cor.table(df, filename = "cor total.doc", table.number = 1,show.conf.interval = F, landscape = TRUE)
+
+#model definition 
+myModel <- ' # regressions
+            UCLA_neg  ~ ASIH + ASIB + AMIH + AMIB
+            UCLA_pleas ~ ASIH + ASIB + AMIH + AMIB
+            UCLA_STI   ~  ASIH + ASIB + AMIH + AMIB
+            UCLA_rel  ~ ASIH + ASIB + AMIH + AMIB
+            UCLA_sha  ~ ASIH + ASIB + AMIH + AMIB
+            consist_uso_cond ~ UCLA_neg + UCLA_pleas + UCLA_STI + UCLA_rel + UCLA_sha
+            prob_uso_cond_prox_relsex ~ UCLA_neg + UCLA_pleas + UCLA_STI + UCLA_rel + UCLA_sha
+            CAEP_Colocaba ~ UCLA_neg + UCLA_pleas + UCLA_STI + UCLA_rel + UCLA_sha
+            CAEP_usaba ~ UCLA_neg + UCLA_pleas + UCLA_STI + UCLA_rel + UCLA_sha
+
+            '
+#adjustment of the model men 
+fithomb <- sem(myModel,data = dfhombres)
+summary(fithomb,standardized = TRUE, rsquare=TRUE)
+coef(fithomb)
+#path diagram of the model.
+semPaths(fithomb, residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+semPaths(fithomb, "std",residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+semPaths(fithomb, minimum = .13, "std",residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+
+#adjustment of the model women
+fitmuj <- sem(myModel,data = dfmujeres)
+summary(fitmuj,standardized = TRUE)
+coef(fitmuj)
+semPaths(fitmuj, residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+semPaths(fitmuj, "std",residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+semPaths(fitmuj, minimum = .20, "std",residuals = FALSE, edge.label.cex=1.5,optimizeLatRes = TRUE,edge.color ="black",label.prop=2,sizeLat = 6,layout = "tree2",curvePivot = TRUE)
+
+
+
